@@ -1,5 +1,7 @@
 const express = require('express')
 const path = require('path')
+const connectDB = require('./db')
+const seed = require('./seed')
 const app = express()
 const restaurantRoutes = require('./routes/restaurants')
 const userRoutes = require('./routes/users')
@@ -8,8 +10,6 @@ const productsRoutes = require('./routes/products')
 const ordersRoutes = require('./routes/orders')
 const searchRoutes = require('./routes/search')
 const auth = require('./middleware/auth')
-
-require('./seed')
 
 app.use(express.json({ limit: '10mb' }))
 app.use('/api/restaurants', restaurantRoutes)
@@ -35,7 +35,7 @@ app.get('/{*splat}', (req, res) => {
 })
 
 if (require.main === module) {
-    app.listen(3000)
+    connectDB().then(() => seed()).then(() => app.listen(3000))
 }
 
 module.exports = app
