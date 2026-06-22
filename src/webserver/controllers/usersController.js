@@ -2,15 +2,15 @@ const User = require('../models/User')
 const PASSWORD_REGEX = /^(?=.*\d).{8,}$/
 
 // GET /api/users/:id — return user details excluding password
-exports.getUserById = (req, res) => {
-    const user = User.getUser(parseInt(req.params.id))
+exports.getUserById = async (req, res) => {
+    const user = await User.findById(req.params.id).select('-password')
     if (!user)
         return res.status(404).json({ error: 'User not found' })
     res.json(user)
 }
 
 // POST /api/users — register a new user
-exports.createUser = (req, res) => {
+exports.createUser = async (req, res) => {
     const { username, password, displayName, image, isOwner, lat, lng } = req.body
     if (!username || !password || !displayName || !image)
         return res.status(400).json({ error: 'username, password, displayName and image required' })
@@ -26,9 +26,14 @@ exports.createUser = (req, res) => {
     if (lng === undefined || lng === null || lng === '' || Number.isNaN(lngNum) || lngNum < -180 || lngNum > 180)
         return res.status(400).json({ error: 'A valid longitude (-180 to 180) is required' })
 
-    if (User.findByUsername(username))
-        return res.status(409).json({error: 'Username already taken'})
+    const existing = await User.findOne({ username })
+    if (existing)
+        return res.status(409).json({ error: 'Username already taken' })
 
-    const newUser = User.createUser(username, password, displayName, image, !!isOwner, latNum, lngNum)
-    res.status(201).location(`/api/users/${newUser.id}`).end()
+    try{
+        const newUser = await User.create({ username, password, displayName, image, isOwner: !!isOwner, lat: latNum, lng: lngNum })
+        res.status(201).location(`/api/users/${newUser._id}`).end()
+    } catch(err) {
+        res.status(500).json({error: 'Failed to create user'})
+    }
 }
