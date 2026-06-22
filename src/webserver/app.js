@@ -1,5 +1,6 @@
 const express = require('express')
 const path = require('path')
+const connectDB = require('./db')
 const app = express()
 const restaurantRoutes = require('./routes/restaurants')
 const userRoutes = require('./routes/users')
@@ -35,7 +36,7 @@ app.get('/{*splat}', (req, res) => {
 })
 
 if (require.main === module) {
-    app.listen(3000)
+    connectDB().then(() => app.listen(3000))
 }
 
 module.exports = app
