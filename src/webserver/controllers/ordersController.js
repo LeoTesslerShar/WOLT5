@@ -6,34 +6,35 @@ const { estimateDelivery } = require('../utils/delivery')
 
 const CANCEL_WINDOW_MS = 5 * 60 * 1000
 
-exports.getByUser = (req, res) => {
+exports.getByUser = async (req, res) => {
     const userId = req.user?.userId
     if (!userId) return res.status(401).json({ error: 'Unauthorized' })
-    const user = User.getUser(userId)
-    const orders = Order.getByUser(userId).map(order => {
-        const restaurant = Restaurant.getById(order.restaurantId)
+    const user = await User.findById(userId)
+    const orders = await Order.find({ userId })
+    const result = await Promise.all(orders.map(async order => {
+        const restaurant = await Restaurant.findById(order.restaurantId)
         const eta = estimateDelivery(restaurant, user)
         return {
-            ...order,
+            ...order.toObject(),
             restaurantName: restaurant?.name || null,
             restaurantPhone: restaurant?.phone || null,
             etaMinutes: eta.totalMinutes,
             etaTravelMinutes: eta.travelMinutes,
             etaDistanceKm: eta.distanceKm
         }
-    })
-    res.json(orders)
+    }))
+    res.json(result)
 }
 
-exports.getById = (req, res) => {
+exports.getById = async (req, res) => {
     const userId = req.user?.userId
-    const order = Order.getById(req.params.id)
-    if (!order || order.userId !== userId)
+    const order = await Order.findById(req.params.id)
+    if (!order || order.userId.toString() !== userId)
         return res.status(404).json({ error: 'Order not found' })
     res.json(order)
 }
 
-exports.create = (req, res) => {
+exports.create = async (req, res) => {
     const userId = req.user?.userId
     if (!userId) return res.status(401).json({ error: 'Unauthorized' })
     const { restaurantId, products, payment } = req.body
@@ -41,21 +42,23 @@ exports.create = (req, res) => {
     if (!products || !Array.isArray(products) || products.length === 0)
         return res.status(400).json({ error: 'products must be a non-empty array' })
 
-    // payment is required to place an order — validate the card form (no real charge)
     const result = validatePayment(payment)
     if (!result.valid) return res.status(400).json({ error: result.error })
 
-    const order = Order.create(userId, restaurantId, products, {
-        last4: result.last4,
-        brand: result.brand
+    const order = await Order.create({
+        userId,
+        restaurantId,
+        products,
+        payment: { last4: result.last4, brand: result.brand },
+        paid: true
     })
-    res.status(201).location(`/api/orders/${order.id}`).end()
+    res.status(201).location(`/api/orders/${order._id}`).end()
 }
 
-exports.update = (req, res) => {
+exports.update = async (req, res) => {
     const userId = req.user?.userId
-    const order = Order.getById(req.params.id)
-    if (!order || order.userId !== userId)
+    const order = await Order.findById(req.params.id)
+    if (!order || order.userId.toString() !== userId)
         return res.status(404).json({ error: 'Order not found' })
     const { status } = req.body
     if (status === 'cancelled') {
@@ -65,15 +68,15 @@ exports.update = (req, res) => {
         if (order.status === 'cancelled')
             return res.status(409).json({ error: 'Order is already cancelled' })
     }
-    Order.update(req.params.id, { status })
+    await Order.findByIdAndUpdate(req.params.id, { status })
     res.status(204).end()
 }
 
-exports.remove = (req, res) => {
+exports.remove = async (req, res) => {
     const userId = req.user?.userId
-    const order = Order.getById(req.params.id)
-    if (!order || order.userId !== userId)
+    const order = await Order.findById(req.params.id)
+    if (!order || order.userId.toString() !== userId)
         return res.status(404).json({ error: 'Order not found' })
-    Order.remove(req.params.id)
+    await Order.findByIdAndDelete(req.params.id)
     res.status(204).end()
 }
