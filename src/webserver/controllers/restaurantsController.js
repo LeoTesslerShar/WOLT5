@@ -1,16 +1,17 @@
 const Restaurant = require('../models/Restaurant')
 
-exports.getAll = (req, res) => {
-    res.json(Restaurant.getAll())
+exports.getAll = async (req, res) => {
+    res.json(await Restaurant.find())
 }
 
-exports.getById = (req, res) => {
-    const restaurant = Restaurant.getById(req.params.id)
-    if (!restaurant) return res.status(404).json({ error: 'Restaurant not found' })
+exports.getById = async (req, res) => {
+    const restaurant = await Restaurant.findById(req.params.id)
+    if (!restaurant) 
+        return res.status(404).json({ error: 'Restaurant not found' })
     res.json(restaurant)
 }
 
-exports.create = (req, res) => {
+exports.create = async (req, res) => {
     const { name, description, cuisine, address, lat, lng, phone } = req.body
     if (!name || !name.trim()) return res.status(400).json({ error: 'Name is required' })
     if (!phone || !phone.trim()) return res.status(400).json({ error: 'Phone number is required' })
@@ -24,25 +25,27 @@ exports.create = (req, res) => {
         return res.status(400).json({ error: 'A valid longitude (-180 to 180) is required' })
 
     const ownerId = req.user?.userId
-    const restaurant = Restaurant.create(name.trim(), description, cuisine, address, ownerId, latNum, lngNum, phone)
-    res.status(201).location(`/api/restaurants/${restaurant.id}`).json({ id: restaurant.id })
+    const restaurant = await Restaurant.create({name: name.trim(), description, cuisine, address, ownerId, lat: latNum, lng: lngNum, phone})
+    res.status(201).location(`/api/restaurants/${restaurant._id}`).json({ id: restaurant._id })
 }
 
-exports.update = (req, res) => {
-    const restaurant = Restaurant.getById(req.params.id)
-    if (!restaurant) return res.status(404).json({ error: 'Restaurant not found' })
-    if (restaurant.ownerId && restaurant.ownerId !== req.user?.userId)
+exports.update = async (req, res) => {
+    const restaurant = await Restaurant.findById(req.params.id)
+    if (!restaurant) 
+        return res.status(404).json({ error: 'Restaurant not found' })
+    if (restaurant.ownerId && restaurant.ownerId.toString() !== req.user?.userId)
         return res.status(403).json({ error: 'Not authorized' })
     const { name, description, cuisine, address, lat, lng, phone } = req.body
-    Restaurant.update(req.params.id, { name, description, cuisine, address, lat, lng, phone })
+    await Restaurant.findByIdAndUpdate(req.params.id, { name, description, cuisine, address, lat, lng, phone })
     res.status(204).end()
 }
 
-exports.remove = (req, res) => {
-    const restaurant = Restaurant.getById(req.params.id)
-    if (!restaurant) return res.status(404).json({ error: 'Restaurant not found' })
-    if (restaurant.ownerId && restaurant.ownerId !== req.user?.userId)
+exports.remove = async (req, res) => {
+    const restaurant = await Restaurant.findById(req.params.id)
+    if (!restaurant) 
+        return res.status(404).json({ error: 'Restaurant not found' })
+    if (restaurant.ownerId && restaurant.ownerId.toString() !== req.user?.userId)
         return res.status(403).json({ error: 'Not authorized' })
-    Restaurant.remove(req.params.id)
+    await Restaurant.findByIdAndDelete(req.params.id)
     res.status(204).end()
 }

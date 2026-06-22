@@ -16,8 +16,6 @@ app.use(express.json({ limit: '10mb' }))
 app.use('/api/restaurants', restaurantRoutes)
 app.use('/api/users', userRoutes)
 app.use('/api/tokens', tokenRoutes)
-// Viewing products is public (like viewing restaurants). JWT protection for
-// product mutations (add/edit/delete) belongs to Epic 5 — restaurant management.
 app.use('/api/restaurants/:id/products', productsRoutes)
 app.use('/api/orders', auth, ordersRoutes)
 app.use('/api/search', searchRoutes)
