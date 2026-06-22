@@ -10,8 +10,6 @@ const ordersRoutes = require('./routes/orders')
 const searchRoutes = require('./routes/search')
 const auth = require('./middleware/auth')
 
-require('./seed')
-
 app.use(express.json({ limit: '10mb' }))
 app.use('/api/restaurants', restaurantRoutes)
 app.use('/api/users', userRoutes)

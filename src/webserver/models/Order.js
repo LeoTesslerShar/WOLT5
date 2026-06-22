@@ -1,42 +1,21 @@
-const { randomUUID } = require('crypto')
+const mongoose = require('mongoose')
 
-const orders = []
+const OrderSchema = new mongoose.Schema({
+    userId: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
+    restaurantId: { type: mongoose.Schema.Types.ObjectId, ref: 'Restaurant', required: true },
+    products: [{
+        productId: { type: mongoose.Schema.Types.ObjectId, ref: 'Product' },
+        name: { type: String },
+        price: { type: Number },
+        quantity: { type: Number }
+    }],
+    status: { type: String, default: 'pending' },
+    payment: {
+        brand: { type: String },
+        last4: { type: String }
+    },
+    paid: { type: Boolean, default: false },
+    createdAt: { type: Date, default: Date.now }
+})
 
-const getByUser = (userId) => orders.filter(o => o.userId === userId)
-
-const getById = (id) => orders.find(o => o.id === id)
-
-const create = (userId, restaurantId, products, payment = null) => {
-    const order = {
-        id: randomUUID(),
-        userId,
-        restaurantId,
-        products,
-        status: 'pending',
-        // only the masked card is kept ({ brand, last4 }) — never the full number or CVV
-        payment,
-        paid: !!payment,
-        createdAt: new Date().toISOString()
-    }
-    orders.push(order)
-    return order
-}
-
-const update = (id, fields) => {
-    const order = orders.find(o => o.id === id)
-    if (!order) return null
-    Object.assign(order, Object.fromEntries(
-        Object.entries(fields).filter(([_, v]) => v !== undefined))
-    )
-    return order
-}
-
-const remove = (id) => {
-    const index = orders.findIndex(o => o.id === id)
-    if (index === -1) return null
-    return orders.splice(index,1)[0]
-}
-
-const reset = () => orders.splice(0, orders.length)
-
-module.exports = { getByUser, getById, create, update, remove, reset }
+module.exports = mongoose.model('Order', OrderSchema)
