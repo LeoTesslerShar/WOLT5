@@ -1,26 +1,44 @@
+const mongoose = require('mongoose')
 const Restaurant = require('./models/Restaurant')
 const Product = require('./models/Product')
 
-const r1 = Restaurant.create('השוורמה של מומי', 'שוורמה אמיתית מהדרום', 'Israeli', 'אילת', null, 29.56, 34.95, '08-6371234')
-Product.create(r1.id, 'שוורמה עוף', 'בפיתה עם טחינה וחומוס', 38, 'Main')
-Product.create(r1.id, 'שוורמה טלה', 'בלחמניה עם ירקות', 45, 'Main')
-Product.create(r1.id, 'פלאפל', 'כדורי פלאפל פריכים', 22, 'Side')
-Product.create(r1.id, 'קולה', 'שתייה קרה 0.5 ל', 10, 'Drink')
+async function seed() {
+    const count = await Restaurant.countDocuments()
+    if (count > 0) return // already seeded
 
-const r2 = Restaurant.create('לחם חביתה', 'ארוחות בוקר וחביתות כל היום', 'Israeli', 'נתניה', null, 32.33, 34.86, '09-8624571')
-Product.create(r2.id, 'חביתה אמריקאית', 'עם גבינה צהובה ועגבניות', 42, 'Breakfast')
-Product.create(r2.id, 'טוסט שלוש גבינות', 'אמנטל, גאודה ובולגרית', 35, 'Breakfast')
-Product.create(r2.id, 'שייק תות', 'טרי עם חלב', 28, 'Drink')
-Product.create(r2.id, 'סלט ירקות', 'ירקות עונתיים קצוצים', 25, 'Side')
+    const r1 = await Restaurant.create({ name: 'השוורמה של מומי', description: 'שוורמה אמיתית מהדרום', cuisine: 'Israeli', address: 'אילת', lat: 29.56, lng: 34.95, phone: '08-6371234' })
+    await Product.insertMany([
+        { restaurantId: r1._id, name: 'שוורמה עוף', description: 'בפיתה עם טחינה וחומוס', price: 38, category: 'Main' },
+        { restaurantId: r1._id, name: 'שוורמה טלה', description: 'בלחמניה עם ירקות', price: 45, category: 'Main' },
+        { restaurantId: r1._id, name: 'פלאפל', description: 'כדורי פלאפל פריכים', price: 22, category: 'Side' },
+        { restaurantId: r1._id, name: 'קולה', description: 'שתייה קרה 0.5 ל', price: 10, category: 'Drink' },
+    ])
 
-const r3 = Restaurant.create("צ'יקו מיקו קוראסון", 'אוכל מקסיקני אותנטי', 'Mexican', 'תל אביב', null, 32.07, 34.79, '03-5290183')
-Product.create(r3.id, 'בוריטו עוף', 'עם אורז, שעועית וגואקמולה', 55, 'Main')
-Product.create(r3.id, 'טאקו בקר', '3 טאקו עם בשר טחון', 48, 'Main')
-Product.create(r3.id, 'נאצ\'וס', "עם סלסה וצ'יז דיפ", 32, 'Starter')
-Product.create(r3.id, 'מרגריטה', 'לימון ומלח', 38, 'Drink')
+    const r2 = await Restaurant.create({ name: 'לחם חביתה', description: 'ארוחות בוקר וחביתות כל היום', cuisine: 'Israeli', address: 'נתניה', lat: 32.33, lng: 34.86, phone: '09-8624571' })
+    await Product.insertMany([
+        { restaurantId: r2._id, name: 'חביתה אמריקאית', description: 'עם גבינה צהובה ועגבניות', price: 42, category: 'Breakfast' },
+        { restaurantId: r2._id, name: 'טוסט שלוש גבינות', description: 'אמנטל, גאודה ובולגרית', price: 35, category: 'Breakfast' },
+        { restaurantId: r2._id, name: 'שייק תות', description: 'טרי עם חלב', price: 28, category: 'Drink' },
+        { restaurantId: r2._id, name: 'סלט ירקות', description: 'ירקות עונתיים קצוצים', price: 25, category: 'Side' },
+    ])
 
-const r4 = Restaurant.create('הסנדוויץ\' של ברכה', 'סנדוויצ\'ים ביתיים מהלב', 'Israeli', 'חיפה', null, 32.79, 34.99, '04-8123976')
-Product.create(r4.id, 'סנדוויץ\' טונה', 'טונה עם מיונז וחסה', 28, 'Main')
-Product.create(r4.id, 'סנדוויץ\' ביצה', 'ביצה קשה עם חמוצים', 24, 'Main')
-Product.create(r4.id, 'סנדוויץ\' גבינות', 'קוטג\' ובולגרית עם עגבנייה', 26, 'Main')
-Product.create(r4.id, 'מיץ תפוזים', 'סחוט טרי', 18, 'Drink')
+    const r3 = await Restaurant.create({ name: "צ'יקו מיקו קוראסון", description: 'אוכל מקסיקני אותנטי', cuisine: 'Mexican', address: 'תל אביב', lat: 32.07, lng: 34.79, phone: '03-5290183' })
+    await Product.insertMany([
+        { restaurantId: r3._id, name: 'בוריטו עוף', description: 'עם אורז, שעועית וגואקמולה', price: 55, category: 'Main' },
+        { restaurantId: r3._id, name: 'טאקו בקר', description: '3 טאקו עם בשר טחון', price: 48, category: 'Main' },
+        { restaurantId: r3._id, name: "נאצ'וס", description: "עם סלסה וצ'יז דיפ", price: 32, category: 'Starter' },
+        { restaurantId: r3._id, name: 'מרגריטה', description: 'לימון ומלח', price: 38, category: 'Drink' },
+    ])
+
+    const r4 = await Restaurant.create({ name: "הסנדוויץ' של ברכה", description: "סנדוויצ'ים ביתיים מהלב", cuisine: 'Israeli', address: 'חיפה', lat: 32.79, lng: 34.99, phone: '04-8123976' })
+    await Product.insertMany([
+        { restaurantId: r4._id, name: "סנדוויץ' טונה", description: 'טונה עם מיונז וחסה', price: 28, category: 'Main' },
+        { restaurantId: r4._id, name: "סנדוויץ' ביצה", description: 'ביצה קשה עם חמוצים', price: 24, category: 'Main' },
+        { restaurantId: r4._id, name: "סנדוויץ' גבינות", description: "קוטג' ובולגרית עם עגבנייה", price: 26, category: 'Main' },
+        { restaurantId: r4._id, name: 'מיץ תפוזים', description: 'סחוט טרי', price: 18, category: 'Drink' },
+    ])
+
+    console.log('Database seeded with sample restaurants and products')
+}
+
+module.exports = seed
