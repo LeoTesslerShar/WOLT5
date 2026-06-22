@@ -1,0 +1,16 @@
+.restaurant-card {
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+  cursor: pointer;
+}
+
+.restaurant-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15) !important;
+}
+
+.restaurant-card__banner {
+  height: 120px;
+  background: linear-gradient(135deg, #009de0, #00c2e8);
+  border-top-left-radius: 0.375rem;
+  border-top-right-radius: 0.375rem;
+}

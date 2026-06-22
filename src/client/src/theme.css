@@ -1,0 +1,23 @@
+/* Global color schemes for light/dark mode.
+   data-theme is set on <html> by ThemeContext. */
+
+:root,
+[data-theme='light'] {
+  --app-bg: #f6f7f9;
+  --app-text: #1a1a1a;
+  --app-muted: #6c757d;
+  --navbar-bg: #009de0;
+}
+
+[data-theme='dark'] {
+  --app-bg: #161618;
+  --app-text: #f1f1f1;
+  --app-muted: #9aa0a6;
+  --navbar-bg: #009de0;
+}
+
+body {
+  background-color: var(--app-bg);
+  color: var(--app-text);
+  transition: background-color 0.2s ease, color 0.2s ease;
+}

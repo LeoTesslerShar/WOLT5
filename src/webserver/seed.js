@@ -1,0 +1,26 @@
+const Restaurant = require('./models/Restaurant')
+const Product = require('./models/Product')
+
+const r1 = Restaurant.create('השוורמה של מומי', 'שוורמה אמיתית מהדרום', 'Israeli', 'אילת', null, 29.56, 34.95, '08-6371234')
+Product.create(r1.id, 'שוורמה עוף', 'בפיתה עם טחינה וחומוס', 38, 'Main')
+Product.create(r1.id, 'שוורמה טלה', 'בלחמניה עם ירקות', 45, 'Main')
+Product.create(r1.id, 'פלאפל', 'כדורי פלאפל פריכים', 22, 'Side')
+Product.create(r1.id, 'קולה', 'שתייה קרה 0.5 ל', 10, 'Drink')
+
+const r2 = Restaurant.create('לחם חביתה', 'ארוחות בוקר וחביתות כל היום', 'Israeli', 'נתניה', null, 32.33, 34.86, '09-8624571')
+Product.create(r2.id, 'חביתה אמריקאית', 'עם גבינה צהובה ועגבניות', 42, 'Breakfast')
+Product.create(r2.id, 'טוסט שלוש גבינות', 'אמנטל, גאודה ובולגרית', 35, 'Breakfast')
+Product.create(r2.id, 'שייק תות', 'טרי עם חלב', 28, 'Drink')
+Product.create(r2.id, 'סלט ירקות', 'ירקות עונתיים קצוצים', 25, 'Side')
+
+const r3 = Restaurant.create("צ'יקו מיקו קוראסון", 'אוכל מקסיקני אותנטי', 'Mexican', 'תל אביב', null, 32.07, 34.79, '03-5290183')
+Product.create(r3.id, 'בוריטו עוף', 'עם אורז, שעועית וגואקמולה', 55, 'Main')
+Product.create(r3.id, 'טאקו בקר', '3 טאקו עם בשר טחון', 48, 'Main')
+Product.create(r3.id, 'נאצ\'וס', "עם סלסה וצ'יז דיפ", 32, 'Starter')
+Product.create(r3.id, 'מרגריטה', 'לימון ומלח', 38, 'Drink')
+
+const r4 = Restaurant.create('הסנדוויץ\' של ברכה', 'סנדוויצ\'ים ביתיים מהלב', 'Israeli', 'חיפה', null, 32.79, 34.99, '04-8123976')
+Product.create(r4.id, 'סנדוויץ\' טונה', 'טונה עם מיונז וחסה', 28, 'Main')
+Product.create(r4.id, 'סנדוויץ\' ביצה', 'ביצה קשה עם חמוצים', 24, 'Main')
+Product.create(r4.id, 'סנדוויץ\' גבינות', 'קוטג\' ובולגרית עם עגבנייה', 26, 'Main')
+Product.create(r4.id, 'מיץ תפוזים', 'סחוט טרי', 18, 'Drink')
