@@ -1,41 +1,52 @@
-const mongoose = require('mongoose')
+const User       = require('./models/User')
 const Restaurant = require('./models/Restaurant')
-const Product = require('./models/Product')
+const Product    = require('./models/Product')
 
 async function seed() {
     const count = await Restaurant.countDocuments()
     if (count > 0) return // already seeded
 
-    const r1 = await Restaurant.create({ name: 'השוורמה של מומי', description: 'שוורמה אמיתית מהדרום', cuisine: 'Israeli', address: 'אילת', lat: 29.56, lng: 34.95, phone: '08-6371234' })
+    // seed owner — all seed restaurants belong to this account
+    let owner = await User.findOne({ username: 'admin' })
+    if (!owner) {
+        owner = await User.create({
+            username: 'admin',
+            password: 'admin123',
+            displayName: 'Admin',
+            image: 'https://ui-avatars.com/api/?name=Admin',
+            isOwner: true,
+            lat: 32.07,
+            lng: 34.79,
+        })
+    }
+    const oid = owner._id
+
+    const r1 = await Restaurant.create({ ownerId: oid, name: 'Shawarma Momi', description: 'Authentic shawarma from the south', cuisine: 'Israeli', address: 'Eilat', lat: 29.56, lng: 34.95, phone: '08-6371234' })
     await Product.insertMany([
-        { restaurantId: r1._id, name: 'שוורמה עוף', description: 'בפיתה עם טחינה וחומוס', price: 38, category: 'Main' },
-        { restaurantId: r1._id, name: 'שוורמה טלה', description: 'בלחמניה עם ירקות', price: 45, category: 'Main' },
-        { restaurantId: r1._id, name: 'פלאפל', description: 'כדורי פלאפל פריכים', price: 22, category: 'Side' },
-        { restaurantId: r1._id, name: 'קולה', description: 'שתייה קרה 0.5 ל', price: 10, category: 'Drink' },
+        { restaurantId: r1._id, name: 'Chicken Shawarma', description: 'In pita with tahini and hummus', price: 38, category: 'Main' },
+        { restaurantId: r1._id, name: 'Lamb Shawarma',    description: 'In a bun with vegetables',      price: 45, category: 'Main' },
+        { restaurantId: r1._id, name: 'Falafel',          description: 'Crispy falafel balls',           price: 22, category: 'Side' },
+        { restaurantId: r1._id, name: 'Cola',             description: 'Cold drink 0.5L',                price: 10, category: 'Drink' },
     ])
 
-    const r2 = await Restaurant.create({ name: 'לחם חביתה', description: 'ארוחות בוקר וחביתות כל היום', cuisine: 'Israeli', address: 'נתניה', lat: 32.33, lng: 34.86, phone: '09-8624571' })
+    const r2 = await Restaurant.create({ ownerId: oid, name: 'Bread & Omelette', description: 'Breakfast and omelettes all day', cuisine: 'Israeli', address: 'Netanya', lat: 32.33, lng: 34.86, phone: '09-8624571' })
     await Product.insertMany([
-        { restaurantId: r2._id, name: 'חביתה אמריקאית', description: 'עם גבינה צהובה ועגבניות', price: 42, category: 'Breakfast' },
-        { restaurantId: r2._id, name: 'טוסט שלוש גבינות', description: 'אמנטל, גאודה ובולגרית', price: 35, category: 'Breakfast' },
-        { restaurantId: r2._id, name: 'שייק תות', description: 'טרי עם חלב', price: 28, category: 'Drink' },
-        { restaurantId: r2._id, name: 'סלט ירקות', description: 'ירקות עונתיים קצוצים', price: 25, category: 'Side' },
+        { restaurantId: r2._id, name: 'American Omelette', description: 'With yellow cheese and tomatoes', price: 42, category: 'Breakfast' },
+        { restaurantId: r2._id, name: 'Three Cheese Toast', description: 'Emmental, Gouda and Bulgarian',  price: 35, category: 'Breakfast' },
+        { restaurantId: r2._id, name: 'Strawberry Shake',  description: 'Fresh with milk',                 price: 28, category: 'Drink' },
+        { restaurantId: r2._id, name: 'Vegetable Salad',   description: 'Seasonal chopped vegetables',     price: 25, category: 'Side' },
     ])
 
-    const r3 = await Restaurant.create({ name: "צ'יקו מיקו קוראסון", description: 'אוכל מקסיקני אותנטי', cuisine: 'Mexican', address: 'תל אביב', lat: 32.07, lng: 34.79, phone: '03-5290183' })
+    const r3 = await Restaurant.create({ ownerId: oid, name: 'Chiko Miko Kurason', description: 'Authentic Latin street food in the heart of Tel Aviv', cuisine: 'Latin', address: 'Tel Aviv', lat: 34, lng: 33, phone: '03-5290183' })
     await Product.insertMany([
-        { restaurantId: r3._id, name: 'בוריטו עוף', description: 'עם אורז, שעועית וגואקמולה', price: 55, category: 'Main' },
-        { restaurantId: r3._id, name: 'טאקו בקר', description: '3 טאקו עם בשר טחון', price: 48, category: 'Main' },
-        { restaurantId: r3._id, name: "נאצ'וס", description: "עם סלסה וצ'יז דיפ", price: 32, category: 'Starter' },
-        { restaurantId: r3._id, name: 'מרגריטה', description: 'לימון ומלח', price: 38, category: 'Drink' },
+        { restaurantId: r3._id, name: 'Kurason',                description: 'Our signature dish — slow-cooked meat with house spices',         price: 55, category: 'Main' },
+        { restaurantId: r3._id, name: 'Jurason with Chocolate', description: 'Crispy jurason drizzled with rich dark chocolate sauce',           price: 42, category: 'Dessert' },
     ])
 
-    const r4 = await Restaurant.create({ name: "הסנדוויץ' של ברכה", description: "סנדוויצ'ים ביתיים מהלב", cuisine: 'Israeli', address: 'חיפה', lat: 32.79, lng: 34.99, phone: '04-8123976' })
+    const r4 = await Restaurant.create({ ownerId: oid, name: 'BBB', description: 'Best burgers in Petah Tikva, grilled fresh to order', cuisine: 'American', address: 'Petah Tikva', lat: 32, lng: 40, phone: '03-9241567' })
     await Product.insertMany([
-        { restaurantId: r4._id, name: "סנדוויץ' טונה", description: 'טונה עם מיונז וחסה', price: 28, category: 'Main' },
-        { restaurantId: r4._id, name: "סנדוויץ' ביצה", description: 'ביצה קשה עם חמוצים', price: 24, category: 'Main' },
-        { restaurantId: r4._id, name: "סנדוויץ' גבינות", description: "קוטג' ובולגרית עם עגבנייה", price: 26, category: 'Main' },
-        { restaurantId: r4._id, name: 'מיץ תפוזים', description: 'סחוט טרי', price: 18, category: 'Drink' },
+        { restaurantId: r4._id, name: 'Burger',        description: 'Classic beef patty with lettuce, tomato and BBB sauce', price: 52, category: 'Main' },
+        { restaurantId: r4._id, name: 'Cheese Burger', description: 'Beef patty with melted cheddar, pickles and mustard',   price: 58, category: 'Main' },
     ])
 
     console.log('Database seeded with sample restaurants and products')

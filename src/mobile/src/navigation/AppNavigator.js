@@ -18,6 +18,13 @@ import AdminDishFormScreen from '../screens/AdminDishFormScreen'
 import AdminOrdersScreen from '../screens/AdminOrdersScreen'
 import { colors } from '../theme'
 
+import HomeScreen       from '../screens/HomeScreen'
+import LoginScreen      from '../screens/LoginScreen'
+import RegisterScreen   from '../screens/RegisterScreen'
+import RestaurantScreen from '../screens/RestaurantScreen'
+import OrdersScreen     from '../screens/OrdersScreen'
+import SearchScreen     from '../screens/SearchScreen'
+
 const Stack = createNativeStackNavigator()
 
 const screenOptions = {
@@ -50,7 +57,6 @@ export default function AppNavigator() {
     return (
         <Stack.Navigator screenOptions={screenOptions}>
             {user ? (
-                // Logged-in screens
                 <>
                     <Stack.Screen
                         name="Home"
@@ -93,9 +99,8 @@ export default function AppNavigator() {
                     />
                 </>
             ) : (
-                // Auth screens
                 <>
-                    <Stack.Screen name="Login" component={LoginScreen} options={{ headerShown: false }} />
+                    <Stack.Screen name="Login"    component={LoginScreen}    options={{ headerShown: false }} />
                     <Stack.Screen name="Register" component={RegisterScreen} options={{ title: 'Create account' }} />
                 </>
             )}
