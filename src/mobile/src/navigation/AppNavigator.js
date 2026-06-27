@@ -1,12 +1,15 @@
 import React from 'react'
+import { TouchableOpacity, Text } from 'react-native'
 import { createNativeStackNavigator } from '@react-navigation/native-stack'
 import { useAuth } from '../contexts/AuthContext'
-import HomeScreen from '../screens/HomeScreen'
-import LoginScreen from '../screens/LoginScreen'
-import RegisterScreen from '../screens/RegisterScreen'
-import RestaurantScreen from '../screens/RestaurantScreen'
-import OrdersScreen from '../screens/OrdersScreen'
 import { colors } from '../theme'
+
+import HomeScreen       from '../screens/HomeScreen'
+import LoginScreen      from '../screens/LoginScreen'
+import RegisterScreen   from '../screens/RegisterScreen'
+import RestaurantScreen from '../screens/RestaurantScreen'
+import OrdersScreen     from '../screens/OrdersScreen'
+import SearchScreen     from '../screens/SearchScreen'
 
 const Stack = createNativeStackNavigator()
 
@@ -22,16 +25,26 @@ export default function AppNavigator() {
     return (
         <Stack.Navigator screenOptions={screenOptions}>
             {user ? (
-                // Logged-in screens
                 <>
-                    <Stack.Screen name="Home" component={HomeScreen} options={{ title: 'Wolt' }} />
+                    <Stack.Screen
+                        name="Home"
+                        component={HomeScreen}
+                        options={({ navigation }) => ({
+                            title: 'Wolt',
+                            headerRight: () => (
+                                <TouchableOpacity onPress={() => navigation.navigate('Search')} style={{ marginRight: 8 }}>
+                                    <Text style={{ fontSize: 20 }}>🔍</Text>
+                                </TouchableOpacity>
+                            ),
+                        })}
+                    />
                     <Stack.Screen name="Restaurant" component={RestaurantScreen} />
-                    <Stack.Screen name="Orders" component={OrdersScreen} options={{ title: 'My Orders' }} />
+                    <Stack.Screen name="Orders"     component={OrdersScreen}     options={{ title: 'My Orders' }} />
+                    <Stack.Screen name="Search"     component={SearchScreen}     options={{ title: 'Search' }} />
                 </>
             ) : (
-                // Auth screens
                 <>
-                    <Stack.Screen name="Login" component={LoginScreen} options={{ headerShown: false }} />
+                    <Stack.Screen name="Login"    component={LoginScreen}    options={{ headerShown: false }} />
                     <Stack.Screen name="Register" component={RegisterScreen} options={{ title: 'Create account' }} />
                 </>
             )}

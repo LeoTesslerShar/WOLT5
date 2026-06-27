@@ -31,8 +31,13 @@ app.get('/{*splat}', (req, res) => {
     res.sendFile(path.join(clientBuild, 'index.html'))
 })
 
+const seed = require('./seed')
+
 if (require.main === module) {
-    connectDB().then(() => app.listen(3000))
+    connectDB().then(async () => {
+        await seed()
+        app.listen(3000)
+    })
 }
 
 module.exports = app
