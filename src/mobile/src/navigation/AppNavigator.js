@@ -18,13 +18,6 @@ import AdminDishFormScreen from '../screens/AdminDishFormScreen'
 import AdminOrdersScreen from '../screens/AdminOrdersScreen'
 import { colors } from '../theme'
 
-import HomeScreen       from '../screens/HomeScreen'
-import LoginScreen      from '../screens/LoginScreen'
-import RegisterScreen   from '../screens/RegisterScreen'
-import RestaurantScreen from '../screens/RestaurantScreen'
-import OrdersScreen     from '../screens/OrdersScreen'
-import SearchScreen     from '../screens/SearchScreen'
-
 const Stack = createNativeStackNavigator()
 
 const screenOptions = {
