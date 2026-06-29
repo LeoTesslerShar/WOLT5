@@ -21,8 +21,10 @@ Demonstrates the registration and login flows, and browsing restaurants, on both
 4. If the username is already taken, an error is shown without navigating away.
 5. On success you are redirected to the home page and logged in automatically.
 
-<!-- SCREENSHOT: web register page with all fields filled --> ![alt text](image-1.png)
-<!-- SCREENSHOT: web register page showing a validation error (e.g. short password) --> ![alt text](image-2.png)
+<!-- SCREENSHOT: web register page with all fields filled --> 
+![alt text](image-1.png)
+<!-- SCREENSHOT: web register page showing a validation error (e.g. short password) --> 
+![alt text](image-2.png)
 <!-- SCREENSHOT: web home page after successful registration --> ![alt text](image-3.png)
 
 ### Mobile
@@ -33,9 +35,12 @@ Demonstrates the registration and login flows, and browsing restaurants, on both
 4. Validation messages appear inline below each field before you submit.
 5. On success you land on the home screen.
 
-<!-- SCREENSHOT: mobile register screen --> ![alt text](image-12.png)
-<!-- SCREENSHOT: mobile register screen showing validation hints --> ![alt text](image-11.png)
-<!-- SCREENSHOT: mobile home screen after registration --> ![alt text](image-20.png)
+<!-- SCREENSHOT: mobile register screen --> 
+![alt text](image-12.png)
+<!-- SCREENSHOT: mobile register screen showing validation hints --> 
+![alt text](image-11.png)
+<!-- SCREENSHOT: mobile home screen after registration --> 
+![alt text](image-20.png)
 
 ---
 
@@ -48,9 +53,12 @@ Demonstrates the registration and login flows, and browsing restaurants, on both
 3. Wrong credentials a clear error message is shown, you stay on the login page.
 4. Correct credentials redirected to the home page.
 
-<!-- SCREENSHOT: web login page --> ![alt text](image-4.png)
-<!-- SCREENSHOT: web login page with wrong-credentials error --> ![alt text](image-5.png)
-<!-- SCREENSHOT: web home page after login, showing user info in the navbar --> ![alt text](image-7.png)
+<!-- SCREENSHOT: web login page --> 
+![alt text](image-4.png)
+<!-- SCREENSHOT: web login page with wrong-credentials error --> 
+![alt text](image-5.png)
+<!-- SCREENSHOT: web home page after login, showing user info in the navbar --> 
+![alt text](image-7.png)
 
 ### Mobile
 
@@ -58,8 +66,10 @@ Demonstrates the registration and login flows, and browsing restaurants, on both
 2. Wrong credentials error shown below the button.
 3. Correct credentials navigate to the home screen.
 
-<!-- SCREENSHOT: mobile login screen --> ![alt text](image-16.png)
-<!-- SCREENSHOT: mobile login with error message --> ![alt text](image-17.png)
+<!-- SCREENSHOT: mobile login screen --> 
+![alt text](image-16.png)
+<!-- SCREENSHOT: mobile login with error message --> 
+![alt text](image-17.png)
 
 ---
 
@@ -71,8 +81,10 @@ Demonstrates the registration and login flows, and browsing restaurants, on both
 2. A search bar at the top filters across restaurant names and dish names.
 3. Clicking a restaurant card opens its detail page with the full menu.
 
-<!-- SCREENSHOT: web home page with restaurant list --> ![alt text](image-8.png)
-<!-- SCREENSHOT: web restaurant detail page with menu items --> ![alt text](image-9.png)
+<!-- SCREENSHOT: web home page with restaurant list --> 
+![alt text](image-8.png)
+<!-- SCREENSHOT: web restaurant detail page with menu items --> 
+![alt text](image-9.png)
 
 ### Mobile
 
@@ -80,8 +92,10 @@ Demonstrates the registration and login flows, and browsing restaurants, on both
 2. Pull to refresh to reload the list.
 3. Tap a card to open the restaurant detail screen with products.
 
-<!-- SCREENSHOT: mobile home screen with restaurant cards --> ![alt text](image-20.png)
-<!-- SCREENSHOT: mobile restaurant detail screen --> ![alt text](image-21.png)
+<!-- SCREENSHOT: mobile home screen with restaurant cards --> 
+![alt text](image-20.png)
+<!-- SCREENSHOT: mobile restaurant detail screen --> 
+![alt text](image-21.png)
 
 ---
 
@@ -91,11 +105,13 @@ Demonstrates the registration and login flows, and browsing restaurants, on both
 
 Click **Logout** in the navbar. Session is cleared and you are returned to the login page.
 
-<!-- SCREENSHOT: web navbar with logout button --> ![alt text](image-19.png)
+<!-- SCREENSHOT: web navbar with logout button --> 
+![alt text](image-19.png)
 
 ### Mobile
 
 Open the side drawer (tap the menu icon) and tap **Logout**. Token is cleared, app returns to the login screen.
 
 <!-- SCREENSHOT: mobile drawer open with logout option -->
-![mobile logout screen](Screenshot 2026-06-28 005941.png)
+![mobile logout screen](mobile-logout.png)
+
