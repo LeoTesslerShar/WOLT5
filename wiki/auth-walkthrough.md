@@ -1,4 +1,4 @@
-﻿# Auth Walkthrough ג€” Register, Login & Browse
+﻿# Auth Walkthrough Register, Login & Browse
 
 Demonstrates the registration and login flows, and browsing restaurants, on both the **web client** and the **mobile app**.
 
