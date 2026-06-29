@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+﻿import React, { useState } from 'react'
 import {
     View, Text, TextInput, TouchableOpacity,
     StyleSheet, ScrollView, Image, Alert, ActivityIndicator,
@@ -62,6 +62,11 @@ export default function RegisterScreen({ navigation }) {
         setErrors(e => ({ ...e, [key]: errs[key] }))
     }
 
+    function useDefaultAvatar() {
+        const url = `https://ui-avatars.com/api/?name=${encodeURIComponent(fields.displayName || 'User')}&size=200&background=009DE0&color=fff`
+        setImage(url)
+        setErrors(e => ({ ...e, image: undefined }))
+    }
     async function pickImage() {
         const perm = await ImagePicker.requestMediaLibraryPermissionsAsync()
         if (!perm.granted) {
@@ -125,6 +130,9 @@ export default function RegisterScreen({ navigation }) {
                     ? <Image source={{ uri: image }} style={styles.avatar} />
                     : <Text style={styles.imagePlaceholder}>Tap to pick{'\n'}profile picture</Text>
                 }
+            </TouchableOpacity>
+            <TouchableOpacity onPress={useDefaultAvatar} style={styles.defaultAvatarBtn}>
+                <Text style={styles.defaultAvatarText}>Use default avatar</Text>
             </TouchableOpacity>
             {touched.image && errors.image && <Text style={[styles.hint, styles.errorText]}>{errors.image}</Text>}
 
@@ -203,6 +211,8 @@ const styles = StyleSheet.create({
     },
     avatar:           { width: 100, height: 100 },
     imagePlaceholder: { color: colors.border, fontSize: 12, textAlign: 'center' },
+    defaultAvatarBtn:  { alignSelf: 'center', marginBottom: spacing.sm },
+    defaultAvatarText: { color: colors.primary, fontSize: 12, textDecorationLine: 'underline' },
     fieldWrap:  { marginBottom: spacing.md },
     label:      { fontSize: 13, fontWeight: '600', color: colors.text, marginBottom: 2 },
     hint:       { fontSize: 11, color: colors.border, marginBottom: 4 },
