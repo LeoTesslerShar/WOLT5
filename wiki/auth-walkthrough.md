@@ -10,14 +10,14 @@ Demonstrates the registration and login flows, and browsing restaurants, on both
 
 1. Open [http://localhost:3000/register](http://localhost:3000/register)
 2. Fill in all required fields:
-   - **Username** ג€” must be unique
-   - **Password** ג€” at least 8 characters, must include at least one digit
-   - **Confirm password** ג€” must match
+   - **Username**  must be unique
+   - **Password**  at least 8 characters, must include at least one digit
+   - **Confirm password**  must match
    - **Display name**
-   - **Profile picture** ג€” click to upload from your computer
-   - **Latitude / Longitude** ג€” used for distance-based sorting
+   - **Profile picture**  click to upload from your computer
+   - **Latitude / Longitude** ” used for distance-based sorting
    - Check **"I am a restaurant owner"** if applicable
-3. Field validation runs before submission ג€” invalid fields are highlighted in red with a clear message.
+3. Field validation runs before submission invalid fields are highlighted in red with a clear message.
 4. If the username is already taken, an error is shown without navigating away.
 5. On success you are redirected to the home page and logged in automatically.
 
@@ -27,7 +27,7 @@ Demonstrates the registration and login flows, and browsing restaurants, on both
 
 ### Mobile
 
-1. Open the app ג€” the login screen is shown.
+1. Open the app the login screen is shown.
 2. Tap **Register**.
 3. Fill in the same fields. Tap the profile picture area to choose from gallery or camera.
 4. Validation messages appear inline below each field before you submit.
@@ -45,8 +45,8 @@ Demonstrates the registration and login flows, and browsing restaurants, on both
 
 1. Go to [http://localhost:3000](http://localhost:3000)
 2. Enter username and password.
-3. Wrong credentials ג†’ a clear error message is shown, you stay on the login page.
-4. Correct credentials ג†’ redirected to the home page.
+3. Wrong credentials a clear error message is shown, you stay on the login page.
+4. Correct credentials redirected to the home page.
 
 <!-- SCREENSHOT: web login page --> ![alt text](image-4.png)
 <!-- SCREENSHOT: web login page with wrong-credentials error --> ![alt text](image-5.png)
@@ -55,8 +55,8 @@ Demonstrates the registration and login flows, and browsing restaurants, on both
 ### Mobile
 
 1. Enter username and password on the login screen.
-2. Wrong credentials ג†’ error shown below the button.
-3. Correct credentials ג†’ navigate to the home screen.
+2. Wrong credentials error shown below the button.
+3. Correct credentials navigate to the home screen.
 
 <!-- SCREENSHOT: mobile login screen --> ![alt text](image-16.png)
 <!-- SCREENSHOT: mobile login with error message --> ![alt text](image-17.png)
