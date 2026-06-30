@@ -29,14 +29,24 @@ export default function HomeScreen({ navigation }) {
     useEffect(() => {
         navigation.setOptions({
             headerLeft: () => (
-                <TouchableOpacity onPress={logout} style={{ marginLeft: 8 }}>
-                    <Text style={{ color: colors.error, fontSize: 13 }}>Logout</Text>
-                </TouchableOpacity>
+                <View style={{ flexDirection: 'row', marginLeft: 8 }}>
+                    <TouchableOpacity onPress={logout}>
+                        <Text style={{ color: colors.error, fontSize: 13 }}>Logout</Text>
+                    </TouchableOpacity>
+                    <TouchableOpacity onPress={() => navigation.navigate('Profile')} style={{ marginLeft: 12 }}>
+                        <Text style={{ color: colors.primary, fontSize: 13 }}>Profile</Text>
+                    </TouchableOpacity>
+                </View>
             ),
             headerRight: () => (
-                <TouchableOpacity onPress={() => navigation.navigate('Orders')} style={{ marginRight: 8 }}>
-                    <Text style={{ color: colors.primary, fontSize: 13 }}>My Orders</Text>
-                </TouchableOpacity>
+                <View style={{ flexDirection: 'row', marginRight: 8 }}>
+                    <TouchableOpacity onPress={() => navigation.navigate('Cart')}>
+                        <Text style={{ color: colors.primary, fontSize: 13 }}>Cart</Text>
+                    </TouchableOpacity>
+                    <TouchableOpacity onPress={() => navigation.navigate('Orders')} style={{ marginLeft: 12 }}>
+                        <Text style={{ color: colors.primary, fontSize: 13 }}>My Orders</Text>
+                    </TouchableOpacity>
+                </View>
             ),
         })
     }, [navigation])
