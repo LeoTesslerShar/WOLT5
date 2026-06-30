@@ -25,8 +25,8 @@ Demonstrates the registration and login flows, and browsing restaurants, on both
 ![alt text](image-1.png)
 <!-- SCREENSHOT: web register page showing a validation error (e.g. short password) --> 
 ![alt text](image-2.png)
-<!-- SCREENSHOT: web home page after successful registration --> ![alt text](image-3.png)
-
+<!-- SCREENSHOT: web home page after successful registration -->
+![alt text](image-3.png)
 ### Mobile
 
 1. Open the app the login screen is shown.
