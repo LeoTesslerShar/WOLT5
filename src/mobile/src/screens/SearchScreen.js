@@ -102,6 +102,8 @@ const styles = StyleSheet.create({
     card: {
         backgroundColor: colors.surface, borderRadius: radius.md,
         padding: spacing.md, marginBottom: spacing.md,
+        shadowColor: '#000', shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.08, shadowRadius: 4, elevation: 3,
     },
     typeTag:        { alignSelf: 'flex-start', backgroundColor: colors.primary, borderRadius: radius.sm, paddingHorizontal: spacing.sm, paddingVertical: 2, marginBottom: spacing.xs },
     typeTagProduct: { backgroundColor: colors.success },

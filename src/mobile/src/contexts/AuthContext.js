@@ -3,26 +3,39 @@ import AsyncStorage from '@react-native-async-storage/async-storage'
 import api, { setAuthToken } from '../services/api'
 
 const AuthContext = createContext(null)
-const STORAGE_KEY = 'wolt.session'
+
+// Keys used to persist the session in AsyncStorage so it survives app restarts.
+const TOKEN_KEY = 'auth.token'
+const USER_KEY = 'auth.user'
 
 export function AuthProvider({ children }) {
     const [user, setUser] = useState(null)
     const [token, setToken] = useState(null)
-    // true while we check storage for a saved session on launch
-    const [restoring, setRestoring] = useState(true)
+    // While we read the persisted session on startup we don't yet know if the
+    // user is logged in, so we hold off rendering to avoid flashing the Login screen.
+    const [loading, setLoading] = useState(true)
 
-    // restore a persisted session when the app starts
+    // Rehydrate the session from AsyncStorage on app start.
     useEffect(() => {
-        AsyncStorage.getItem(STORAGE_KEY)
-            .then((raw) => {
-                if (!raw) return
-                const saved = JSON.parse(raw)
-                setAuthToken(saved.token)
-                setToken(saved.token)
-                setUser(saved.user)
-            })
-            .catch(() => {})
-            .finally(() => setRestoring(false))
+        async function restoreSession() {
+            try {
+                const [storedToken, storedUser] = await Promise.all([
+                    AsyncStorage.getItem(TOKEN_KEY),
+                    AsyncStorage.getItem(USER_KEY),
+                ])
+                if (storedToken && storedUser) {
+                    setAuthToken(storedToken)
+                    setToken(storedToken)
+                    setUser(JSON.parse(storedUser))
+                }
+            } catch (err) {
+                // Corrupt/unavailable storage: start logged out rather than crash.
+                console.warn('Failed to restore session', err)
+            } finally {
+                setLoading(false)
+            }
+        }
+        restoreSession()
     }, [])
 
     async function login(username, password) {
@@ -32,18 +45,21 @@ export function AuthProvider({ children }) {
         setAuthToken(jwt)
         setToken(jwt)
         setUser(nextUser)
-        await AsyncStorage.setItem(STORAGE_KEY, JSON.stringify({ token: jwt, user: nextUser }))
+        await AsyncStorage.multiSet([
+            [TOKEN_KEY, jwt],
+            [USER_KEY, JSON.stringify(nextUser)],
+        ])
     }
 
     async function logout() {
         setAuthToken(null)
         setToken(null)
         setUser(null)
-        await AsyncStorage.removeItem(STORAGE_KEY)
+        await AsyncStorage.multiRemove([TOKEN_KEY, USER_KEY])
     }
 
     return (
-        <AuthContext.Provider value={{ user, token, restoring, login, logout }}>
+        <AuthContext.Provider value={{ user, token, loading, login, logout }}>
             {children}
         </AuthContext.Provider>
     )

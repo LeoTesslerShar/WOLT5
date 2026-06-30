@@ -5,6 +5,7 @@ import { createDrawerNavigator, DrawerContentScrollView, DrawerItem } from '@rea
 import { DrawerActions } from '@react-navigation/native'
 import { useAuth } from '../contexts/AuthContext'
 import { useCart } from '../contexts/CartContext'
+import { useTheme } from '../contexts/ThemeContext'
 import HomeScreen from '../screens/HomeScreen'
 import LoginScreen from '../screens/LoginScreen'
 import RegisterScreen from '../screens/RegisterScreen'
@@ -25,9 +26,10 @@ const Stack = createNativeStackNavigator()
 const Drawer = createDrawerNavigator()
 
 const screenOptions = {
-    headerStyle: { backgroundColor: colors.background },
-    headerTintColor: colors.primary,
-    headerTitleStyle: { color: colors.text },
+    headerStyle: { backgroundColor: colors.primary },
+    headerTintColor: '#fff',
+    headerTitleStyle: { color: '#fff', fontWeight: '700' },
+    headerTitleAlign: 'center',
 }
 
 // hamburger that opens the slide-out drawer
@@ -37,7 +39,7 @@ function MenuButton({ navigation }) {
             onPress={() => navigation.dispatch(DrawerActions.openDrawer())}
             style={{ paddingHorizontal: 8 }}
         >
-            <Text style={{ fontSize: 22, color: colors.primary }}>☰</Text>
+            <Text style={{ fontSize: 22, color: '#fff' }}>☰</Text>
         </TouchableOpacity>
     )
 }
@@ -65,7 +67,7 @@ function AppStack() {
                 })}
             />
             <Stack.Screen name="Restaurant" component={RestaurantScreen} />
-            <Stack.Screen name="Search" component={SearchScreen} />
+            <Stack.Screen name="Search" component={SearchScreen} options={{ title: 'Search' }} />
             <Stack.Screen name="Cart" component={CartScreen} />
             <Stack.Screen name="Checkout" component={CheckoutScreen} />
             <Stack.Screen name="Orders" component={OrdersScreen} options={{ title: 'My Orders' }} />
@@ -82,6 +84,7 @@ function AppStack() {
 // Wolt-style slide-out menu
 function DrawerContent(props) {
     const { user, logout } = useAuth()
+    const { isDark, toggleTheme } = useTheme()
     const go = (screen) => props.navigation.navigate('Main', { screen })
     return (
         <DrawerContentScrollView {...props}>
@@ -94,16 +97,17 @@ function DrawerContent(props) {
             <DrawerItem label="My Orders" onPress={() => go('Orders')} />
             <DrawerItem label="Profile" onPress={() => go('Profile')} />
             {user?.isOwner && <DrawerItem label="Manage Restaurants" onPress={() => go('AdminRestaurants')} />}
+            <DrawerItem label={isDark ? 'Light mode' : 'Dark mode'} onPress={toggleTheme} />
             <DrawerItem label="Log out" labelStyle={{ color: colors.error }} onPress={logout} />
         </DrawerContentScrollView>
     )
 }
 
 export default function AppNavigator() {
-    const { user, restoring } = useAuth()
+    const { user, loading } = useAuth()
 
-    // wait for a saved session to be restored before deciding which stack to show
-    if (restoring) {
+    // wait for the persisted session to be read before deciding which stack to show
+    if (loading) {
         return (
             <View style={styles.splash}>
                 <ActivityIndicator size="large" color={colors.primary} />
@@ -132,7 +136,7 @@ export default function AppNavigator() {
 
 const styles = StyleSheet.create({
     splash: { flex: 1, alignItems: 'center', justifyContent: 'center', backgroundColor: colors.background },
-    headerLink: { color: colors.primary, fontSize: 15, fontWeight: '600' },
+    headerLink: { color: '#fff', fontSize: 15, fontWeight: '600' },
     drawerHeader: { padding: 16, borderBottomWidth: 1, borderBottomColor: colors.border, marginBottom: 8 },
     drawerTitle: { fontSize: 20, fontWeight: '700', color: colors.text },
     drawerBadge: { color: colors.primary, fontSize: 13, fontWeight: '600', marginTop: 2 },
