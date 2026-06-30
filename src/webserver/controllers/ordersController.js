@@ -26,6 +26,17 @@ exports.getByUser = async (req, res) => {
     res.json(result)
 }
 
+// GET /api/restaurants/:id/orders — orders for a restaurant the owner manages
+exports.getByRestaurant = async (req, res) => {
+    const userId = req.user?.userId
+    const restaurant = await Restaurant.findById(req.params.id)
+    if (!restaurant) return res.status(404).json({ error: 'Restaurant not found' })
+    if (restaurant.ownerId?.toString() !== userId)
+        return res.status(403).json({ error: 'Not authorized' })
+    const orders = await Order.find({ restaurantId: req.params.id })
+    res.json(orders)
+}
+
 exports.getById = async (req, res) => {
     const userId = req.user?.userId
     const order = await Order.findById(req.params.id)
