@@ -15,8 +15,9 @@ async function seed() {
             displayName: 'Admin',
             image: 'https://ui-avatars.com/api/?name=Admin',
             isOwner: true,
-            lat: 32.07,
-            lng: 34.79,
+            // located near the seed restaurants (Eilat area) for realistic delivery times
+            lat: 29.62,
+            lng: 34.95,
         })
     }
     const oid = owner._id

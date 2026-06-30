@@ -15,5 +15,11 @@ exports.login = async (req, res) => {
         return res.status(401).json({error: 'Wrong password, try again'})
 
     const token = jwt.sign({ userId: user._id, username: user.username }, SECRET, { expiresIn: '24h' })
-    res.json({ token, userId: user._id })
+    res.json({
+        token,
+        userId: user._id,
+        displayName: user.displayName,
+        image: user.image,
+        isOwner: user.isOwner,
+    })
 }
