@@ -1,11 +1,9 @@
 import React, { useEffect, useState, useCallback } from 'react'
 import { Text, FlatList, TouchableOpacity, StyleSheet, ActivityIndicator, View, RefreshControl } from 'react-native'
 import api from '../services/api'
-import { useAuth } from '../contexts/AuthContext'
 import { colors, typography, spacing, radius } from '../theme'
 
 export default function HomeScreen({ navigation }) {
-    const { logout } = useAuth()
     const [restaurants, setRestaurants] = useState([])
     const [loading, setLoading]         = useState(true)
     const [refreshing, setRefreshing]   = useState(false)
@@ -25,31 +23,6 @@ export default function HomeScreen({ navigation }) {
     useEffect(() => { fetchRestaurants() }, [])
 
     const onRefresh = useCallback(() => { setRefreshing(true); fetchRestaurants() }, [])
-
-    useEffect(() => {
-        navigation.setOptions({
-            headerLeft: () => (
-                <View style={{ flexDirection: 'row', marginLeft: 8 }}>
-                    <TouchableOpacity onPress={logout}>
-                        <Text style={{ color: colors.error, fontSize: 13 }}>Logout</Text>
-                    </TouchableOpacity>
-                    <TouchableOpacity onPress={() => navigation.navigate('Profile')} style={{ marginLeft: 12 }}>
-                        <Text style={{ color: colors.primary, fontSize: 13 }}>Profile</Text>
-                    </TouchableOpacity>
-                </View>
-            ),
-            headerRight: () => (
-                <View style={{ flexDirection: 'row', marginRight: 8 }}>
-                    <TouchableOpacity onPress={() => navigation.navigate('Cart')}>
-                        <Text style={{ color: colors.primary, fontSize: 13 }}>Cart</Text>
-                    </TouchableOpacity>
-                    <TouchableOpacity onPress={() => navigation.navigate('Orders')} style={{ marginLeft: 12 }}>
-                        <Text style={{ color: colors.primary, fontSize: 13 }}>My Orders</Text>
-                    </TouchableOpacity>
-                </View>
-            ),
-        })
-    }, [navigation])
 
     if (loading) return <ActivityIndicator style={{ flex: 1 }} color={colors.primary} />
 
