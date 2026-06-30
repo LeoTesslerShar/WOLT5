@@ -3,9 +3,17 @@ import { View, Text, FlatList, TouchableOpacity, StyleSheet, ActivityIndicator, 
 import api from '../services/api'
 import { colors, typography, spacing, radius } from '../theme'
 
+const CANCEL_WINDOW_MS = 5 * 60 * 1000
+
 // Sum the line items of an order, which the server does not store directly.
 function orderTotal(order) {
     return order.products.reduce((sum, p) => sum + p.price * p.quantity, 0)
+}
+
+// An order can be cancelled only within 5 minutes of being placed.
+function canCancel(order) {
+    if (order.status === 'cancelled' || !order.createdAt) return false
+    return Date.now() - new Date(order.createdAt).getTime() < CANCEL_WINDOW_MS
 }
 
 export default function OrdersScreen() {
@@ -63,7 +71,7 @@ export default function OrdersScreen() {
                             <Text style={typography.caption}>ETA {item.etaMinutes} min</Text>
                         )}
                     </View>
-                    {item.status !== 'cancelled' && (
+                    {canCancel(item) && (
                         <TouchableOpacity style={styles.cancelBtn} onPress={() => cancelOrder(item._id)}>
                             <Text style={styles.cancelText}>Cancel order</Text>
                         </TouchableOpacity>

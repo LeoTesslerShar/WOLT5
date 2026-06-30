@@ -69,10 +69,18 @@ exports.create = async (req, res) => {
 exports.update = async (req, res) => {
     const userId = req.user?.userId
     const order = await Order.findById(req.params.id)
-    if (!order || order.userId.toString() !== userId)
+    if (!order) return res.status(404).json({ error: 'Order not found' })
+
+    // the customer who placed the order, or the owner of its restaurant, may update it
+    const isCustomer = order.userId.toString() === userId
+    const restaurant = await Restaurant.findById(order.restaurantId)
+    const isOwner = restaurant?.ownerId?.toString() === userId
+    if (!isCustomer && !isOwner)
         return res.status(404).json({ error: 'Order not found' })
+
     const { status } = req.body
-    if (status === 'cancelled') {
+    // the 5-minute cancellation window only applies to the customer cancelling
+    if (status === 'cancelled' && isCustomer) {
         const ageMs = Date.now() - new Date(order.createdAt).getTime()
         if (ageMs > CANCEL_WINDOW_MS)
             return res.status(403).json({ error: 'Cancellation window has passed' })

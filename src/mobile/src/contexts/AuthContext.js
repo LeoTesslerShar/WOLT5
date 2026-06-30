@@ -12,8 +12,7 @@ export function AuthProvider({ children }) {
     const [user, setUser] = useState(null)
     const [token, setToken] = useState(null)
     // While we read the persisted session on startup we don't yet know if the
-    // user is logged in, so we hold off rendering the navigator to avoid
-    // flashing the Login screen before rehydration finishes.
+    // user is logged in, so we hold off rendering to avoid flashing the Login screen.
     const [loading, setLoading] = useState(true)
 
     // Rehydrate the session from AsyncStorage on app start.

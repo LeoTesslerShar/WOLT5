@@ -5,7 +5,7 @@ import api from '../services/api'
 import { colors, typography, spacing, radius } from '../theme'
 
 export default function CheckoutScreen({ navigation }) {
-    const { items, total, itemsByRestaurant, clearCart } = useCart()
+    const { items, total, itemsByRestaurant, removeItem } = useCart()
     const [cardName, setCardName] = useState('')
     const [cardNumber, setCardNumber] = useState('')
     const [expiry, setExpiry] = useState('')
@@ -20,27 +20,37 @@ export default function CheckoutScreen({ navigation }) {
         const payment = { cardName, cardNumber, expiry, cvv }
 
         // One order per restaurant, since each order belongs to a single restaurant.
-        const requests = Object.entries(itemsByRestaurant).map(([restaurantId, group]) => {
-            const products = group.map((it) => ({
-                productId: it.productId,
-                name: it.name,
-                price: it.price,
-                quantity: it.quantity,
-            }))
-            return api.post('/orders', { restaurantId, products, payment })
+        const groups = Object.entries(itemsByRestaurant)
+        setLoading(true)
+        const results = await Promise.allSettled(
+            groups.map(([restaurantId, group]) => {
+                const products = group.map((it) => ({
+                    productId: it.productId,
+                    name: it.name,
+                    price: it.price,
+                    quantity: it.quantity,
+                }))
+                return api.post('/orders', { restaurantId, products, payment })
+            })
+        )
+        setLoading(false)
+
+        // Remove only the items whose order succeeded, so a retry won't double-charge.
+        const failures = []
+        results.forEach((res, i) => {
+            const group = groups[i][1]
+            if (res.status === 'fulfilled') group.forEach((it) => removeItem(it.productId))
+            else failures.push(res.reason?.response?.data?.error || 'Order failed')
         })
 
-        setLoading(true)
-        try {
-            await Promise.all(requests)
-            clearCart()
+        if (failures.length === 0) {
             Alert.alert('Order placed', 'Your order is on its way!')
             navigation.navigate('Orders')
-        } catch (err) {
-            const message = err.response?.data?.error || 'Could not place the order. Try again.'
-            Alert.alert('Payment failed', message)
-        } finally {
-            setLoading(false)
+        } else if (failures.length === groups.length) {
+            Alert.alert('Payment failed', failures[0])
+        } else {
+            Alert.alert('Partially placed', 'Some orders went through; the rest are still in your cart.')
+            navigation.navigate('Orders')
         }
     }
 
