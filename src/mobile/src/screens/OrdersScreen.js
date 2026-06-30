@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react'
-import { View, Text, FlatList, StyleSheet, ActivityIndicator } from 'react-native'
+import { View, Text, FlatList, TouchableOpacity, StyleSheet, ActivityIndicator, Alert } from 'react-native'
 import api from '../services/api'
 import { colors, typography, spacing, radius } from '../theme'
 
@@ -18,6 +18,15 @@ export default function OrdersScreen() {
             .catch(console.error)
             .finally(() => setLoading(false))
     }, [])
+
+    async function cancelOrder(id) {
+        try {
+            await api.patch(`/orders/${id}`, { status: 'cancelled' })
+            setOrders((prev) => prev.map((o) => (o._id === id ? { ...o, status: 'cancelled' } : o)))
+        } catch (err) {
+            Alert.alert('Could not cancel', err.response?.data?.error || 'Try again.')
+        }
+    }
 
     if (loading) return <ActivityIndicator style={{ flex: 1 }} color={colors.primary} />
 
@@ -54,6 +63,11 @@ export default function OrdersScreen() {
                             <Text style={typography.caption}>ETA {item.etaMinutes} min</Text>
                         )}
                     </View>
+                    {item.status !== 'cancelled' && (
+                        <TouchableOpacity style={styles.cancelBtn} onPress={() => cancelOrder(item._id)}>
+                            <Text style={styles.cancelText}>Cancel order</Text>
+                        </TouchableOpacity>
+                    )}
                 </View>
             )}
         />
@@ -82,4 +96,9 @@ const styles = StyleSheet.create({
         flexDirection: 'row', justifyContent: 'space-between',
         alignItems: 'center', marginTop: spacing.sm,
     },
+    cancelBtn: {
+        marginTop: spacing.md, borderWidth: 1, borderColor: colors.error,
+        borderRadius: radius.sm, paddingVertical: spacing.sm, alignItems: 'center',
+    },
+    cancelText: { color: colors.error, fontSize: 14, fontWeight: '600' },
 })

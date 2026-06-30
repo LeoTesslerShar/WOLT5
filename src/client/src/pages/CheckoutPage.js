@@ -66,7 +66,12 @@ export default function CheckoutPage() {
     try {
       await api.createOrder({
         restaurantId,
-        products: items,
+        products: items.map(i => ({
+          productId: i._id || i.id,
+          name: i.name,
+          price: i.price,
+          quantity: i.qty,
+        })),
         payment: {
           cardName,
           cardNumber: cardNumber.replace(/[\s-]/g, ''),

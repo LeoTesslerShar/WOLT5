@@ -4,10 +4,12 @@ import {
     StyleSheet, ActivityIndicator, Alert,
 } from 'react-native'
 import api from '../services/api'
+import { useCart } from '../contexts/CartContext'
 import { colors, typography, spacing, radius } from '../theme'
 
 export default function RestaurantScreen({ route, navigation }) {
     const { restaurantId } = route.params ?? {}
+    const { addItem } = useCart()
     const [restaurant, setRestaurant] = useState(null)
     const [products, setProducts]     = useState([])
     const [loading, setLoading]       = useState(true)
@@ -62,7 +64,12 @@ export default function RestaurantScreen({ route, navigation }) {
                         <Text style={[typography.caption, styles.category]}>{item.category}</Text>
                         <Text style={[typography.body, styles.desc]}>{item.description}</Text>
                     </View>
-                    <Text style={styles.price}>₪{item.price.toFixed(2)}</Text>
+                    <View style={styles.priceCol}>
+                        <Text style={styles.price}>₪{item.price.toFixed(2)}</Text>
+                        <TouchableOpacity style={styles.addBtn} onPress={() => addItem(item)}>
+                            <Text style={styles.addText}>Add</Text>
+                        </TouchableOpacity>
+                    </View>
                 </View>
             )}
         />
@@ -83,5 +90,11 @@ const styles = StyleSheet.create({
     },
     cardBody:   { flex: 1, marginRight: spacing.md },
     category:   { color: colors.primary, marginTop: 2 },
+    priceCol:   { alignItems: 'flex-end' },
     price:      { fontSize: 16, fontWeight: '700', color: colors.primary },
+    addBtn: {
+        marginTop: spacing.sm, backgroundColor: colors.primary, borderRadius: radius.sm,
+        paddingVertical: spacing.xs, paddingHorizontal: spacing.md,
+    },
+    addText:    { color: '#fff', fontWeight: '600' },
 })
