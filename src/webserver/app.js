@@ -1,7 +1,6 @@
 const express = require('express')
 const path = require('path')
 const connectDB = require('./db')
-const seed = require('./seed')
 const app = express()
 const restaurantRoutes = require('./routes/restaurants')
 const userRoutes = require('./routes/users')
@@ -15,8 +14,6 @@ app.use(express.json({ limit: '10mb' }))
 app.use('/api/restaurants', restaurantRoutes)
 app.use('/api/users', userRoutes)
 app.use('/api/tokens', tokenRoutes)
-// Viewing products is public (like viewing restaurants). JWT protection for
-// product mutations (add/edit/delete) belongs to Epic 5 — restaurant management.
 app.use('/api/restaurants/:id/products', productsRoutes)
 app.use('/api/orders', auth, ordersRoutes)
 app.use('/api/search', searchRoutes)
@@ -34,8 +31,13 @@ app.get('/{*splat}', (req, res) => {
     res.sendFile(path.join(clientBuild, 'index.html'))
 })
 
+const seed = require('./seed')
+
 if (require.main === module) {
-    connectDB().then(() => seed()).then(() => app.listen(3000))
+    connectDB().then(async () => {
+        await seed()
+        app.listen(3000)
+    })
 }
 
 module.exports = app

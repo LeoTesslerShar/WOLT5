@@ -1,0 +1,596 @@
+@startuml WOLT5
+
+skinparam classAttributeIconSize 0
+skinparam packageStyle rectangle
+
+' ===================== INFRASTRUCTURE =====================
+
+package "Docker Compose Stack" {
+
+    class MongoDBService << (D,#lightblue) database >> {
+        port: 27017
+        db: wolt
+        volumes: mongo_data
+    }
+
+    class WebserverService << (S,#009DE0) service >> {
+        port: 3000
+        image: node:alpine
+        depends_on: mongo
+        env: MONGO_URI
+    }
+
+    class Ex2Service << (S,#FF7700) service >> {
+        port: 8080
+        image: cpp-server (built from CMake)
+    }
+
+    WebserverService --> MongoDBService : waits-for / connects
+    WebserverService --> Ex2Service : TCP socket
+}
+
+' ===================== NODE.JS WEBSERVER (Ex5 - MongoDB) =====================
+
+package "Ex5 Node Server (Express :3000)" {
+
+    class App {
+        +listen(port: 3000): void
+        ' Serves React SPA from ./public
+        ' Mounts all routes under /api
+    }
+
+    package "db" {
+        class DbConnection {
+            -MONGO_URI: string (env or localhost/wolt)
+            -MAX_RETRIES: 10
+            -RETRY_DELAY_MS: 3000
+            +connectDB(): Promise<void>
+        }
+    }
+
+    package "routes" {
+        class UsersRoutes {
+            POST   /api/users        → createUser
+            GET    /api/users/:id    → getUserById
+        }
+        class TokensRoutes {
+            POST   /api/tokens       → login
+        }
+        class RestaurantsRoutes {
+            GET    /api/restaurants          → getAll
+            POST   /api/restaurants          → [auth] create
+            GET    /api/restaurants/:id      → getById
+            PATCH  /api/restaurants/:id      → [auth] update
+            DELETE /api/restaurants/:id      → [auth] remove
+        }
+        class ProductsRoutes {
+            GET    /api/restaurants/:id/products        → getAll
+            POST   /api/restaurants/:id/products        → [auth] create
+            GET    /api/restaurants/:id/products/:pId   → getById
+            PATCH  /api/restaurants/:id/products/:pId   → [auth] update
+            DELETE /api/restaurants/:id/products/:pId   → [auth] remove
+        }
+        class OrdersRoutes {
+            GET    /api/orders       → [auth] getByUser
+            POST   /api/orders       → [auth] create
+            GET    /api/orders/:id   → [auth] getById
+            PATCH  /api/orders/:id   → [auth] update
+            DELETE /api/orders/:id   → [auth] remove
+        }
+        class SearchRoutes {
+            GET    /api/search?query= → search
+        }
+    }
+
+    package "middleware" {
+        class AuthMiddleware {
+            +verify(req, res, next): void
+            ' Expects: Authorization: Bearer {token}
+            ' Attaches: req.user = {userId, username}
+            ' Returns 401 if missing or invalid
+        }
+    }
+
+    package "controllers" {
+        class UsersController {
+            +getUserById(req, res): void
+            +createUser(req, res): void
+            ' Validates: username, pwd>=8+digit,
+            ' displayName, image, lat, lng
+        }
+        class TokensController {
+            +login(req, res): void
+            ' Returns: JWT (24h expiry) + userId
+        }
+        class RestaurantsController {
+            +getAll(req, res): void
+            +getById(req, res): void
+            +create(req, res): void
+            +update(req, res): void
+            +remove(req, res): void
+            ' Enforces owner-only for write ops
+        }
+        class ProductsController {
+            +getAll(req, res): void
+            +getById(req, res): void
+            +create(req, res): void
+            +update(req, res): void
+            +remove(req, res): void
+            ' Validates: name, desc, price>0, category
+        }
+        class OrdersController {
+            +getByUser(req, res): void
+            +getById(req, res): void
+            +create(req, res): void
+            +update(req, res): void
+            +remove(req, res): void
+            ' Validates: payment (Luhn + expiry)
+            ' 5-min cancellation window for updates
+        }
+        class SearchController {
+            +search(req, res): void
+            ' Regex/text-index query on name + category
+            ' Returns: {restaurants[], products[]}
+        }
+    }
+
+    package "models (Mongoose)" {
+        class User << (M,#aaffaa) schema >> {
+            +_id: ObjectId
+            +username: String <<required, unique>>
+            +password: String <<required>>
+            +displayName: String <<required>>
+            +image: String <<required>>
+            +isOwner: Boolean = false
+            +lat: Number <<required>>
+            +lng: Number <<required>>
+        }
+        class Restaurant << (M,#aaffaa) schema >> {
+            +_id: ObjectId
+            +name: String <<required>>
+            +description: String <<required>>
+            +cuisine: String <<required>>
+            +address: String <<required>>
+            +ownerId: ObjectId <<ref: User>>
+            +lat: Number <<required>>
+            +lng: Number <<required>>
+            +phone: String <<required>>
+        }
+        class Product << (M,#aaffaa) schema >> {
+            +_id: ObjectId
+            +restaurantId: ObjectId <<ref: Restaurant>>
+            +name: String <<required>>
+            +description: String <<required>>
+            +category: String <<required>>
+            +price: Number <<required, >0>>
+        }
+        class Order << (M,#aaffaa) schema >> {
+            +_id: ObjectId
+            +userId: ObjectId <<ref: User>>
+            +restaurantId: ObjectId <<ref: Restaurant>>
+            +products: OrderItem[]
+            +status: String = 'pending'
+            +payment: PaymentInfo
+            +paid: Boolean = false
+            +createdAt: Date = Date.now
+        }
+        class OrderItem << (E,#ffffaa) embedded >> {
+            +productId: ObjectId <<ref: Product>>
+            +name: String
+            +price: Number
+            +quantity: Number
+        }
+        class PaymentInfo << (E,#ffffaa) embedded >> {
+            +brand: String
+            +last4: String
+        }
+    }
+
+    package "utils" {
+        class DeliveryUtil {
+            +PREP_MINUTES: 15
+            +COURIER_SPEED_KMH: 30
+            +estimateDelivery(restaurant, user): DeliveryEstimate
+            +haversineKm(lat1, lng1, lat2, lng2): Number
+            ' Returns: {totalMinutes, prepMinutes, travelMinutes, distanceKm}
+        }
+        class PaymentUtil {
+            +validatePayment(payment): ValidationResult
+            +luhnValid(digits): boolean
+            +detectBrand(digits): string
+            +expiryValid(expiry): boolean
+            ' Supports: Visa, Mastercard, Amex
+        }
+    }
+
+    package "services" {
+        class Ex2Client {
+            -EX2_HOST: string
+            -EX2_PORT: 8080
+            +trackProductView(productId): Promise
+            ' TCP socket to C++ recommendation engine
+        }
+        class SeedScript {
+            +seed(): Promise
+            ' Inserts sample restaurants + products
+            ' Run once on fresh DB
+        }
+    }
+}
+
+' ===================== REACT NATIVE APP (Ex5 - NEW) =====================
+
+package "React Native App (Expo)" {
+
+    class RNAppRoot {
+        +render(): JSX
+        ' SafeAreaProvider + NavigationContainer
+        ' Wraps AuthProvider + CartProvider
+    }
+
+    package "contexts" {
+        class AuthContext {
+            +user: UserInfo (userId, displayName, image, isOwner)
+            +token: string
+            +login(username, password): Promise
+            +logout(): void
+            ' Persists token in AsyncStorage
+            ' Auto-restores session on app launch
+            ' useAuth() hook
+        }
+        class CartContext {
+            +items: CartItem[]
+            +restaurantId: string | null
+            +total: number
+            +addItem(product, qty): void
+            +removeItem(productId): void
+            +updateQty(productId, qty): void
+            +clearCart(): void
+            ' Clears if switching restaurant
+            ' useCart() hook
+        }
+        class CartItem << (E,#ffffaa) type >> {
+            +productId: string
+            +name: string
+            +price: number
+            +quantity: number
+        }
+    }
+
+    package "navigation" {
+        class AppNavigator {
+            ' Reads useAuth()
+            ' [Unauthenticated] → AuthStack
+            ' [Authenticated]   → MainDrawer
+        }
+        class AuthStack {
+            LoginScreen
+            RegisterScreen
+        }
+        class MainDrawer {
+            ' Slide-out drawer (mobile pattern)
+            HomeScreen
+            SearchScreen
+            OrdersScreen
+            ProfileScreen
+            AdminScreens (isOwner only)
+        }
+        class MainStack {
+            ' Nested under MainDrawer tabs/drawer
+            RestaurantScreen
+            CartScreen
+            CheckoutScreen
+        }
+    }
+
+    package "services" {
+        class ApiService {
+            -baseURL: "http://localhost:3000/api"
+            -instance: AxiosInstance
+            +setAuthToken(token): void
+            +get(path): Promise
+            +post(path, body): Promise
+            +patch(path, body): Promise
+            +delete(path): Promise
+            ' Auto-injects Authorization: Bearer {token}
+        }
+    }
+
+    package "theme" {
+        class Theme {
+            +primary: "#009DE0"
+            +primaryDark: "#0077A8"
+            +background, surface, text, error, success, border: Color
+            +spacing: xs(4), sm(8), md(16), lg(24), xl(32)
+            +radius: sm(6), md(12), lg(20)
+            +typography: h1, h2, h3, body, caption
+        }
+    }
+
+    package "screens -Auth (Epic 4)" {
+        class LoginScreen {
+            -username: string
+            -password: string
+            -error: string
+            +handleLogin(): void
+            ' Validation: all fields required
+            ' Error: wrong credentials → clear message
+            ' Success: navigate to Home
+        }
+        class RegisterScreen {
+            -username, password, confirmPassword: string
+            -displayName: string
+            -image: ImageAsset | null
+            -lat, lng: number
+            -errors: object
+            +pickImage(): void
+            ' gallery/camera → preview shown
+            +validate(): boolean
+            ' pwd >=8 chars + 1 digit, passwords match
+            ' Visual hints BEFORE input, messages AFTER
+            +handleRegister(): void
+            ' Error: duplicate username → clear message
+            ' Blocked until all fields valid
+        }
+    }
+
+    package "screens -Browse (Epic 4)" {
+        class HomeScreen {
+            -restaurants: Restaurant[]
+            -loading: boolean
+            +fetchRestaurants(): void
+            ' GET /api/restaurants
+            ' Wolt-style restaurant cards
+            ' → RestaurantScreen on tap
+        }
+        class RestaurantScreen {
+            -restaurantId: string (route param)
+            -restaurant: Restaurant
+            -products: Product[]
+            -loading: boolean
+            +fetchData(): void
+            ' GET /api/restaurants/:id
+            ' GET /api/restaurants/:id/products
+            ' Dish cards with add-to-cart
+        }
+        class SearchScreen {
+            -query: string
+            -results: SearchResults (restaurants[], products[])
+            -loading: boolean
+            +handleSearch(): void
+            ' GET /api/search?query=
+            ' Shows restaurant + product results
+        }
+    }
+
+    package "screens -Cart & Orders (Epic 5)" {
+        class CartScreen {
+            ' Reads CartContext
+            ' Line items, qty controls, total
+            ' → CheckoutScreen
+            ' Empty cart state handled
+        }
+        class CheckoutScreen {
+            -cardNumber, expiry, cvv: string
+            -errors: object
+            +validate(): boolean
+            +placeOrder(): void
+            ' POST /api/orders
+            ' On success: clearCart → navigate Orders
+            ' On error: display message
+        }
+        class OrdersScreen {
+            -orders: Order[]
+            -loading: boolean
+            +fetchOrders(): void
+            ' GET /api/orders
+            ' Shows order history + status
+            ' PATCH/:id → update status
+            ' DELETE/:id → cancel (5-min window)
+        }
+    }
+
+    package "screens -Admin (Epic 6, isOwner only)" {
+        class AdminRestaurantsScreen {
+            -restaurants: Restaurant[]
+            +createRestaurant(): void
+            +editRestaurant(id): void
+            +deleteRestaurant(id): void
+            ' POST/PATCH/DELETE /api/restaurants
+            ' Validation + confirmation dialogs
+        }
+        class AdminDishesScreen {
+            -restaurantId: string (route param)
+            -products: Product[]
+            +createProduct(): void
+            +editProduct(id): void
+            +deleteProduct(id): void
+            ' POST/PATCH/DELETE /api/restaurants/:id/products
+        }
+        class AdminOrdersScreen {
+            -orders: Order[]
+            +fetchAllOrders(): void
+            +updateStatus(id, status): void
+            ' GET/PATCH /api/orders (all)
+        }
+    }
+
+    package "screens -Profile (Epic 6)" {
+        class ProfileScreen {
+            ' Reads AuthContext.user
+            ' Shows: displayName, image, username
+            +logout(): void
+            ' Clears token + session → LoginScreen
+        }
+    }
+}
+
+' ===================== REACT WEB CLIENT (Ex4 - unchanged) =====================
+
+package "React Web Client (Ex4 SPA)" {
+
+    class WebAppRoot {
+        +render(): JSX
+        ' BrowserRouter + Routes
+    }
+
+    package "web-contexts" {
+        class WebAuthContext {
+            +user, token: state
+            +login(), register(), logout(): void
+        }
+        class WebCartContext {
+            +items: CartItem[]
+            +addItem(), removeItem(), clear(): void
+            +total(): number
+        }
+        class ThemeContext {
+            +theme: "light" | "dark"
+            +toggleTheme(): void
+        }
+    }
+
+    package "web-pages" {
+        class WebLoginPage
+        class WebRegisterPage
+        class WebHomePage
+        class WebRestaurantPage
+        class WebSearchResultsPage
+        class WebCheckoutPage
+        class WebOrdersPage
+        class WebAdminRestaurantPage
+    }
+
+    package "web-components" {
+        class NavBar
+        class CartSidebar
+        class ProtectedRoute
+    }
+}
+
+' ===================== C++ SERVER =====================
+
+class "Ex2 C++ Server (TCP :8080)" as Ex2Server << (S,#FF7700) >> {
+    +handleProductView(productId): void
+    +getRecommendations(userId): string[]
+    ' Recommendation engine (TCP protocol)
+}
+
+' ===================== MONGOOSE RELATIONSHIPS =====================
+
+User "1" --> "0..*" Restaurant : owns\n(ownerId ref)
+User "1" --> "0..*" Order : places\n(userId ref)
+Restaurant "1" --> "0..*" Product : has\n(restaurantId ref)
+Restaurant "1" --> "0..*" Order : receives\n(restaurantId ref)
+Order "1" *-- "1..*" OrderItem : contains
+Order "1" *-- "1" PaymentInfo : uses
+
+' ===================== BACKEND WIRING =====================
+
+App --> DbConnection : connects on startup
+App --> UsersRoutes
+App --> TokensRoutes
+App --> RestaurantsRoutes
+App --> ProductsRoutes
+App --> OrdersRoutes
+App --> SearchRoutes
+
+RestaurantsRoutes --> AuthMiddleware
+ProductsRoutes --> AuthMiddleware
+OrdersRoutes --> AuthMiddleware
+
+UsersRoutes --> UsersController
+TokensRoutes --> TokensController
+RestaurantsRoutes --> RestaurantsController
+ProductsRoutes --> ProductsController
+OrdersRoutes --> OrdersController
+SearchRoutes --> SearchController
+
+UsersController --> User
+TokensController --> User
+RestaurantsController --> Restaurant
+RestaurantsController --> User
+ProductsController --> Product
+ProductsController --> Ex2Client
+OrdersController --> Order
+OrdersController --> DeliveryUtil
+OrdersController --> PaymentUtil
+SearchController --> Restaurant
+SearchController --> Product
+
+Ex2Client --> Ex2Server : TCP socket
+
+DbConnection --> MongoDBService : mongoose.connect()
+
+' ===================== RN APP WIRING =====================
+
+RNAppRoot --> AuthContext
+RNAppRoot --> CartContext
+RNAppRoot --> AppNavigator
+
+AppNavigator --> AuthContext : reads isAuthenticated
+AppNavigator --> AuthStack
+AppNavigator --> MainDrawer
+MainDrawer --> MainStack
+
+AuthStack --> LoginScreen
+AuthStack --> RegisterScreen
+
+MainDrawer --> HomeScreen
+MainDrawer --> SearchScreen
+MainDrawer --> OrdersScreen
+MainDrawer --> ProfileScreen
+MainDrawer --> AdminRestaurantsScreen
+MainDrawer --> AdminOrdersScreen
+MainStack --> RestaurantScreen
+MainStack --> CartScreen
+MainStack --> CheckoutScreen
+AdminRestaurantsScreen --> AdminDishesScreen
+
+LoginScreen --> AuthContext : login()
+LoginScreen --> ApiService
+RegisterScreen --> ApiService : POST /users
+
+HomeScreen --> ApiService : GET /restaurants
+RestaurantScreen --> ApiService : GET /restaurants/:id\nGET /products
+RestaurantScreen --> CartContext : addItem()
+SearchScreen --> ApiService : GET /search
+
+CartScreen --> CartContext : read
+CheckoutScreen --> ApiService : POST /orders
+CheckoutScreen --> CartContext : clearCart()
+OrdersScreen --> ApiService : GET/PATCH/DELETE /orders
+
+AdminRestaurantsScreen --> ApiService : POST/PATCH/DELETE /restaurants
+AdminDishesScreen --> ApiService : POST/PATCH/DELETE /products
+AdminOrdersScreen --> ApiService : GET/PATCH /orders
+
+ProfileScreen --> AuthContext : logout()
+AuthContext --> ApiService : POST /tokens
+
+ApiService --> App : HTTP REST + JWT
+
+' ===================== WEB CLIENT WIRING =====================
+
+WebAppRoot --> WebAuthContext
+WebAppRoot --> WebCartContext
+WebAppRoot --> ThemeContext
+WebAppRoot --> NavBar
+WebAppRoot --> ProtectedRoute
+WebAppRoot --> WebLoginPage
+WebAppRoot --> WebRegisterPage
+WebAppRoot --> WebHomePage
+WebAppRoot --> WebRestaurantPage
+WebAppRoot --> WebSearchResultsPage
+WebAppRoot --> WebCheckoutPage
+WebAppRoot --> WebOrdersPage
+WebAppRoot --> WebAdminRestaurantPage
+
+WebAuthContext --> ApiService
+WebCartContext ..> WebCheckoutPage
+ProtectedRoute --> WebAuthContext
+
+' Both clients hit the same server
+WebAppRoot ..> App : HTTP REST (served from /public)
+
+@enduml

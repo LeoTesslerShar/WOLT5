@@ -1,33 +1,17 @@
-const { randomUUID } = require('crypto')
+const mongoose = require('mongoose')
 
-const restaurants = []
+const RestaurantSchema = new mongoose.Schema({
+    name:        { type: String, required: true },
+    description: { type: String, required: true },
+    cuisine:     { type: String, required: true },
+    address:     { type: String, required: true },
+    ownerId:     { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
+    lat:         { type: Number, required: true },
+    lng:         { type: Number, required: true },
+    phone:       { type: String, required: true },
+})
 
-const getAll = () => restaurants
+// include virtual 'id' so web client can use restaurant.id alongside _id
+RestaurantSchema.set('toJSON', { virtuals: true })
 
-const getById = (id) => restaurants.find(r => r.id === id)
-
-const create = (name, description, cuisine, address, ownerId, lat = null, lng = null, phone = null) => {
-    const restaurant = { id: randomUUID(), name, description, cuisine, address, ownerId, lat, lng, phone }
-    restaurants.push(restaurant)
-    return restaurant
-}
-
-const update = (id, fields) => {
-    const restaurant = restaurants.find(r => r.id === id)
-    if (!restaurant) return null
-    // only overwrite fields that were actually provided (not undefined)
-    Object.assign(restaurant, Object.fromEntries(
-        Object.entries(fields).filter(([_, v]) => v !== undefined)
-    ))
-    return restaurant
-}
-
-const remove = (id) => {
-    const index = restaurants.findIndex(r => r.id === id)
-    if (index === -1) return null
-    return restaurants.splice(index, 1)[0]
-}
-
-const reset = () => restaurants.splice(0, restaurants.length)
-
-module.exports = { getAll, getById, create, update, remove, reset }
+module.exports = mongoose.model('Restaurant', RestaurantSchema)
