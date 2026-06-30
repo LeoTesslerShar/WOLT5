@@ -47,8 +47,6 @@ Demonstrates creating, editing, and deleting restaurants, dishes, and orders on 
 2. A confirmation dialog appears. Confirm to delete.
 3. The restaurant is removed from the list immediately.
 
-> _The web delete confirmation is a native browser dialog (`window.confirm`)._
-
 ### Delete a restaurant (Mobile)
 
 1. In the admin screen, tap **Delete** next to a restaurant.
@@ -107,9 +105,7 @@ Same flow as restaurants — click/tap **Delete**, confirm in the dialog.
 
 ![Web restaurant page with cart sidebar](web-cart-sidebar.png)
 ![Web checkout page with payment form](web-checkout.png)
-> _Note: the web Orders page currently crashes because the `Order` model is
-> missing a `toJSON` virtual `id`, so `order.id` is undefined. Add
-> `OrderSchema.set('toJSON', { virtuals: true })` to fix._
+![Web orders page with a pending order](web-orders.png)
 
 ### Place an order (Mobile)
 
@@ -129,9 +125,8 @@ Orders can be cancelled within **5 minutes** of placing them.
 **Web:** On My Orders, click **Cancel** next to an order (only visible within 5 minutes).  
 **Mobile:** On the orders screen, tap the order → tap **Cancel**.
 
-> _(Blocked by the same web Orders page issue noted above.)_
-> _The mobile orders screen is currently read-only — cancelling an order is
-> not yet implemented there._
+![Web orders page with the cancel button](web-orders-cancel.png)
+![Mobile orders with the cancel option](mobile-cancel-order.png)
 
 ### Admin: view and manage all orders (Web)
 
@@ -139,12 +134,9 @@ Orders can be cancelled within **5 minutes** of placing them.
 2. All orders for your restaurant are listed with status and items.
 3. You can update the status of any order.
 
-> _The web admin page does not yet include an orders tab._
-
 ### Admin: view and manage all orders (Mobile)
 
 1. Profile → Manage restaurants → tap **Orders** on a restaurant.
 2. Tap an order to view details or change its status.
 
-> _Note: the mobile admin-orders screen depends on a backend endpoint
-> (`GET /api/restaurants/:id/orders`) that is not yet implemented._
+![Mobile admin orders with status controls](mobile-admin-orders.png)

@@ -111,7 +111,7 @@ export default function OrdersPage() {
       )}
 
       {orders.map(order => {
-        const total = (order.products || []).reduce((sum, p) => sum + (p.price || 0) * (p.qty || 1), 0)
+        const total = (order.products || []).reduce((sum, p) => sum + (p.price || 0) * (p.quantity ?? p.qty ?? 1), 0)
         const status = displayStatus(order)
         const cancellable = canCancel(order)
         const isConfirming = confirmingId === order.id
@@ -155,10 +155,10 @@ export default function OrdersPage() {
               {(order.products || []).map((p, i) => (
                 <div key={i} className="order-item-row">
                   <div className="order-item-left">
-                    <span className="order-qty-bubble">{p.qty}</span>
+                    <span className="order-qty-bubble">{p.quantity ?? p.qty}</span>
                     <div className="order-item-text">
                       <span className="order-item-name">{p.name}</span>
-                      <span className="order-item-price">₪{p.price * p.qty}</span>
+                      <span className="order-item-price">₪{p.price * (p.quantity ?? p.qty)}</span>
                     </div>
                   </div>
                 </div>

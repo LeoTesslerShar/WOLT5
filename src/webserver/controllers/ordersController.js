@@ -15,7 +15,7 @@ exports.getByUser = async (req, res) => {
         const restaurant = await Restaurant.findById(order.restaurantId)
         const eta = estimateDelivery(restaurant, user)
         return {
-            ...order.toObject(),
+            ...order.toObject({ virtuals: true }),
             restaurantName: restaurant?.name || null,
             restaurantPhone: restaurant?.phone || null,
             etaMinutes: eta.totalMinutes,
